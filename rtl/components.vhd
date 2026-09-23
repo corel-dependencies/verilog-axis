@@ -122,6 +122,65 @@ package components is
                   status_good_frame   : out std_logic);
       end component axis_fifo;
 
+      component axis_fifo_adapter is
+            generic (
+                  DEPTH                : integer := 4096;
+                  S_DATA_WIDTH         : integer := 8;
+                  S_KEEP_ENABLE        : boolean := (S_DATA_WIDTH > 8);
+                  S_KEEP_WIDTH         : integer := ((S_DATA_WIDTH+7)/8);
+                  M_DATA_WIDTH         : integer := 8;
+                  M_KEEP_ENABLE        : boolean := (M_DATA_WIDTH > 8);
+                  M_KEEP_WIDTH         : integer := ((M_DATA_WIDTH+7)/8);
+                  ID_ENABLE            : boolean := false;
+                  ID_WIDTH             : integer := 8;
+                  DEST_ENABLE          : boolean := false;
+                  DEST_WIDTH           : integer := 8;
+                  USER_ENABLE          : boolean := true;
+                  USER_WIDTH           : integer := 1;
+                  RAM_PIPELINE         : integer := 1;
+                  OUTPUT_FIFO_ENABLE   : boolean := false;
+                  FRAME_FIFO           : boolean := false;
+                  USER_BAD_FRAME_VALUE : boolean := true;
+                  USER_BAD_FRAME_MASK  : integer := 1;
+                  DROP_OVERSIZE_FRAME  : boolean := FRAME_FIFO;
+                  DROP_BAD_FRAME       : boolean := false;
+                  DROP_WHEN_FULL       : boolean := false;
+                  MARK_WHEN_FULL       : boolean := false;
+                  PAUSE_ENABLE         : boolean := false;
+                  FRAME_PAUSE          : boolean := FRAME_FIFO
+                  );
+            port (
+                  clk : in std_logic;
+                  rst : in std_logic;
+
+                  s_axis_tdata  : in  std_ulogic_vector(S_DATA_WIDTH-1 downto 0);
+                  s_axis_tkeep  : in  std_ulogic_vector(S_KEEP_WIDTH-1 downto 0);
+                  s_axis_tvalid : in  std_logic;
+                  s_axis_tready : out std_logic;
+                  s_axis_tlast  : in  std_logic;
+                  s_axis_tid    : in  std_ulogic_vector(ID_WIDTH-1 downto 0);
+                  s_axis_tdest  : in  std_ulogic_vector(DEST_WIDTH-1 downto 0);
+                  s_axis_tuser  : in  std_ulogic_vector(USER_WIDTH-1 downto 0);
+
+                  m_axis_tdata  : out std_ulogic_vector(M_DATA_WIDTH-1 downto 0);
+                  m_axis_tkeep  : out std_ulogic_vector(M_KEEP_WIDTH-1 downto 0);
+                  m_axis_tvalid : out std_logic;
+                  m_axis_tready : in  std_logic;
+                  m_axis_tlast  : out std_logic;
+                  m_axis_tid    : out std_ulogic_vector(ID_WIDTH-1 downto 0);
+                  m_axis_tdest  : out std_ulogic_vector(DEST_WIDTH-1 downto 0);
+                  m_axis_tuser  : out std_ulogic_vector(USER_WIDTH-1 downto 0);
+
+                  pause_req : in  std_ulogic;
+                  pause_ack : out std_ulogic;
+
+                  status_depth        : out std_ulogic_vector(ceil_log2(DEPTH) downto 0);
+                  status_depth_commit : out std_ulogic_vector(ceil_log2(DEPTH) downto 0);
+                  status_overflow     : out std_logic;
+                  status_bad_frame    : out std_logic;
+                  status_good_frame   : out std_logic);
+      end component axis_fifo_adapter;
+
       component axis_register is
             generic (
                   DATA_WIDTH  : integer := 8;
